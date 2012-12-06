@@ -1,5 +1,5 @@
 var irc = require('irc');
-var client = new irc.Client('chat.freenode.net', 'Sudobot', {
+var client = new irc.Client('chat.freenode.net', 'Sudobot1', {
     channels: ['#sudoroom'],
 });
 
@@ -26,4 +26,57 @@ client.addListener('message', function(from, to, message) {
 /* add super basic error listener to avoid sudobot fatal stack trace */
 client.addListener('error', function(message) {
     console.log('error: ', message);
+});
+
+var irc_nick_re = /([A-Za-z0-9\[\]\{\}\-\\\^\<])/;
+karma_list = {}
+
+/* Request a user's karma score */
+client.addListener('message', function(from, to, message) {
+    var karma_query_re = new RegExp("karma " + irc_nick_re.source);
+    query_match = karma_query_re.exec(message);
+
+    if( query_match ) {
+        /* this was a valid request to the bot */
+        username = query_match[0];
+        if(username in karma_list) {
+            console.log(username + " has " + karma_list[username] + " karma.");
+        } else {
+            console.log(username + " has no karma score.");
+        }
+    }
+});
+
+/* Increment a user's karma score */
+client.addListener('message', function(from, to, message) {
+    var karma_inc_re = new RegExp(irc_nick_re.source + "++");
+    inc_match = karma_inc_re.exec(message);
+
+    if( query_match ) {
+        username = query_match[0];
+
+        if(username in karma_list) {
+            karma_list[username]++;
+        } else {
+            /* need to instantiate karma score for user */
+            karma_list[username] = 1;
+        }
+    }
+});
+
+/* Decrement a user's karma score */
+client.addListener('message', function(from, to, message) {
+    var karma_inc_re = new RegExp(irc_nick_re.source + "--");
+    inc_match = karma_inc_re.exec(message);
+
+    if( query_match ) {
+        username = query_match[0];
+
+        if(username in karma_list) {
+            karma_list[username]--;
+        } else {
+            /* need to instantiate karma score for user */
+            karma_list[username] = -1;
+        }
+    }
 });

@@ -103,7 +103,7 @@ var string_in_list = function(string, list) {
 client.addListener('message', function(from, to, message) {
     open_cmds = [
         "sudo open",
-        "!open"
+        "open!"
     ];
 
     if(string_in_list(message, open_cmds)) {
@@ -121,7 +121,7 @@ client.addListener('message', function(from, to, message) {
 client.addListener('message', function(from, to, message) {
     close_cmds = [
         "sudo close",
-        "!close"
+        "closed!"
     ];
     
     if(string_in_list(message, close_cmds)) {

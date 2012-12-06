@@ -1,6 +1,9 @@
+BOT_CHANNEL = '#sudobot'
+BOT_NAME    = 'Sudobot1'
+
 var irc = require('irc');
-var client = new irc.Client('chat.freenode.net', 'Sudobot1', {
-    channels: ['#sudobot'],
+var client = new irc.Client('chat.freenode.net', BOT_NAME, {
+    channels: [BOT_CHANNEL],
 });
 
 client.addListener('message', function(from, to, message) {
@@ -40,9 +43,9 @@ client.addListener('message', function(from, to, message) {
     if( query_match ) {
         username = query_match[1];
         if(username in karma_list) {
-            console.log(username + " has " + karma_list[username] + " karma.");
+            client.say(BOT_CHANNEL, username + " has " + karma_list[username] + " karma.");
         } else {
-            console.log(username + " has no karma score.");
+            client.say(BOT_CHANNEL, username + " has no karma score.");
         }
     }
 });

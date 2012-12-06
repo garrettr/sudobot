@@ -1,6 +1,16 @@
 BOT_CHANNEL = '#sudobot'
 BOT_NAME    = 'Sudobot1'
 
+/* Object to store persistent state maintained by sudobot */
+/* Idea for storing state - callback on process.exit (?) */
+var sudo_state = {
+    karma_scores: {},
+    open_flag: false,
+    opener: undefined,
+    opened: undefined,
+    open_times: []
+};
+
 var irc = require('irc');
 var client = new irc.Client('chat.freenode.net', BOT_NAME, {
     channels: [BOT_CHANNEL],
@@ -33,7 +43,6 @@ client.addListener('error', function(message) {
 
 /* Basic re to match IRC nicks */
 var irc_nick_re = /([A-Za-z0-9\[\]\{\}\-\\\^\<]+)/;
-karma_list = {}
 
 /* Request a user's karma score */
 client.addListener('message', function(from, to, message) {
@@ -42,8 +51,8 @@ client.addListener('message', function(from, to, message) {
 
     if( query_match ) {
         username = query_match[1];
-        if(username in karma_list) {
-            client.say(BOT_CHANNEL, username + " has " + karma_list[username] + " karma.");
+        if(username in sudo_state.karma_scores) {
+            client.say(BOT_CHANNEL, username + " has " + sudo_state.karma_scores[username] + " karma.");
         } else {
             client.say(BOT_CHANNEL, username + " has no karma score.");
         }
@@ -58,11 +67,11 @@ client.addListener('message', function(from, to, message) {
     if( inc_match ) {
         username = inc_match[1];
 
-        if(username in karma_list) {
-            karma_list[username]++;
+        if(username in sudo_state.karma_scores) {
+            sudo_state.karma_scores[username]++;
         } else {
             /* need to instantiate karma score for user */
-            karma_list[username] = 1;
+            sudo_state.karma_scores[username] = 1;
         }
     }
 });
@@ -75,21 +84,14 @@ client.addListener('message', function(from, to, message) {
     if( dec_match ) {
         username = dec_match[1];
 
-        if(username in karma_list) {
-            karma_list[username]--;
+        if(username in sudo_state.karma_scores) {
+            sudo_state.karma_scores[username]--;
         } else {
             /* need to instantiate karma score for user */
-            karma_list[username] = -1;
+            sudo_state.karma_scores[username] = -1;
         }
     }
 });
-
-open_flag = false;
-opener = undefined;
-opened = undefined;
-/* A list of times that Sudo Room has been open - could be cool as metadata.
- * Store start, stop, and who opened */
-open_times = [];
 
 var string_in_list = function(string, list) {
     for(var i = 0; i < list.length; i++) {
@@ -107,9 +109,9 @@ client.addListener('message', function(from, to, message) {
     ];
 
     if(string_in_list(message, open_cmds)) {
-        if( open_flag == false ) {
-            open_flag = true;
-            opener = from;
+        if( sudo_state.open_flag == false ) {
+            sudo_state.open_flag = true;
+            sudo_state.opener = from;
             opened = new Date(); // defaults to now
             client.say(BOT_CHANNEL, "sudoroom is open!");
         } else {
@@ -125,18 +127,18 @@ client.addListener('message', function(from, to, message) {
     ];
     
     if(string_in_list(message, close_cmds)) {
-        if( open_flag == true ) {
+        if( sudo_state.open_flag == true ) {
             /* save metadata */
-            open_times.push({
-                'start': opened,
+            sudo_state.open_times.push({
+                'start': sudo_state.opened,
                 'stop': new Date(),
-                'opener': opener,
+                'opener': sudo_state.opener,
             });
 
             /* reset flags */
-            open_flag = false;
-            opened = undefined;
-            opener = undefined;
+            sudo_state.open_flag = false;
+            sudo_state.opened = undefined;
+            sudo_state.opener = undefined;
 
             client.say(BOT_CHANNEL, "sudoroom is closed.");
         } else {
@@ -147,8 +149,8 @@ client.addListener('message', function(from, to, message) {
 
 client.addListener('message', function(from, to, message) {
     if(message == "open?") {
-        if( open_flag == true ) {
-            client.say(BOT_CHANNEL, "sudoroom is open! (thanks, " + opener + ")" );
+        if( sudo_state.open_flag == true ) {
+            client.say(BOT_CHANNEL, "sudoroom is open! (thanks, " + sudo_state.opener + ")" );
         } else {
             client.say(BOT_CHANNEL, "sudoroom is closed right now." );
         }

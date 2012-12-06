@@ -22,3 +22,8 @@ client.addListener('message', function(from, to, message) {
         client.say(to, Math.round(Math.random() * 10));
     }
 });
+
+/* add super basic error listener to avoid sudobot fatal stack trace */
+client.addListener('error', function(message) {
+    console.log('error: ', message);
+});

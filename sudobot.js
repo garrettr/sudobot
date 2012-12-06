@@ -1,6 +1,6 @@
 var irc = require('irc');
 var client = new irc.Client('chat.freenode.net', 'Sudobot1', {
-    channels: ['#sudoroom'],
+    channels: ['#sudobot'],
 });
 
 client.addListener('message', function(from, to, message) {
@@ -28,7 +28,8 @@ client.addListener('error', function(message) {
     console.log('error: ', message);
 });
 
-var irc_nick_re = /([A-Za-z0-9\[\]\{\}\-\\\^\<])/;
+/* Basic re to match IRC nicks */
+var irc_nick_re = /([A-Za-z0-9\[\]\{\}\-\\\^\<]+)/;
 karma_list = {}
 
 /* Request a user's karma score */
@@ -37,8 +38,7 @@ client.addListener('message', function(from, to, message) {
     query_match = karma_query_re.exec(message);
 
     if( query_match ) {
-        /* this was a valid request to the bot */
-        username = query_match[0];
+        username = query_match[1];
         if(username in karma_list) {
             console.log(username + " has " + karma_list[username] + " karma.");
         } else {
@@ -49,11 +49,13 @@ client.addListener('message', function(from, to, message) {
 
 /* Increment a user's karma score */
 client.addListener('message', function(from, to, message) {
-    var karma_inc_re = new RegExp(irc_nick_re.source + "++");
+    var karma_inc_re = new RegExp(irc_nick_re.source + "\\+\\+");
     inc_match = karma_inc_re.exec(message);
 
-    if( query_match ) {
-        username = query_match[0];
+    if( inc_match ) {
+        username = inc_match[1];
+
+        console.log("inc match");
 
         if(username in karma_list) {
             karma_list[username]++;
@@ -66,11 +68,13 @@ client.addListener('message', function(from, to, message) {
 
 /* Decrement a user's karma score */
 client.addListener('message', function(from, to, message) {
-    var karma_inc_re = new RegExp(irc_nick_re.source + "--");
-    inc_match = karma_inc_re.exec(message);
+    var karma_inc_re = new RegExp(irc_nick_re.source + "\\-\\-");
+    dec_match = karma_inc_re.exec(message);
 
-    if( query_match ) {
-        username = query_match[0];
+    if( dec_match ) {
+        username = dec_match[1];
+
+        console.log("dec match");
 
         if(username in karma_list) {
             karma_list[username]--;

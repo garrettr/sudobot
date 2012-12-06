@@ -83,3 +83,74 @@ client.addListener('message', function(from, to, message) {
         }
     }
 });
+
+open_flag = false;
+opener = undefined;
+opened = undefined;
+/* A list of times that Sudo Room has been open - could be cool as metadata.
+ * Store start, stop, and who opened */
+open_times = [];
+
+var string_in_list = function(string, list) {
+    for(var i = 0; i < list.length; i++) {
+        if(list[i] == string) {
+            return true;
+        }
+    }
+    return false;
+};
+
+client.addListener('message', function(from, to, message) {
+    open_cmds = [
+        "sudo open",
+        "!open"
+    ];
+
+    if(string_in_list(message, open_cmds)) {
+        if( open_flag == false ) {
+            open_flag = true;
+            opener = from;
+            opened = new Date(); // defaults to now
+            client.say(BOT_CHANNEL, "sudoroom is open!");
+        } else {
+            client.say(BOT_CHANNEL, "sudoroom is already open. If this is a mistake, please close and re-open so I can keep track of our open times.");
+        }
+    }
+});
+
+client.addListener('message', function(from, to, message) {
+    close_cmds = [
+        "sudo close",
+        "!close"
+    ];
+    
+    if(string_in_list(message, close_cmds)) {
+        if( open_flag == true ) {
+            /* save metadata */
+            open_times.push({
+                'start': opened,
+                'stop': new Date(),
+                'opener': opener,
+            });
+
+            /* reset flags */
+            open_flag = false;
+            opened = undefined;
+            opener = undefined;
+
+            client.say(BOT_CHANNEL, "sudoroom is closed.");
+        } else {
+            client.say(BOT_CHANNEL, "sudoroom was already closed.");
+        }
+    }
+});
+
+client.addListener('message', function(from, to, message) {
+    if(message == "open?") {
+        if( open_flag == true ) {
+            client.say(BOT_CHANNEL, "sudoroom is open! (thanks, " + opener + ")" );
+        } else {
+            client.say(BOT_CHANNEL, "sudoroom is closed right now." );
+        }
+    }
+});

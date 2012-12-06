@@ -55,8 +55,6 @@ client.addListener('message', function(from, to, message) {
     if( inc_match ) {
         username = inc_match[1];
 
-        console.log("inc match");
-
         if(username in karma_list) {
             karma_list[username]++;
         } else {
@@ -73,8 +71,6 @@ client.addListener('message', function(from, to, message) {
 
     if( dec_match ) {
         username = dec_match[1];
-
-        console.log("dec match");
 
         if(username in karma_list) {
             karma_list[username]--;

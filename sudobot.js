@@ -1,5 +1,7 @@
 BOT_CHANNEL = '#sudobot'
-BOT_NAME    = 'Sudobot1'
+BOT_NAME    = 'Sudobot'
+
+SUDOBOT_STATE_FILE = "sudobot-state.json"
 
 /* Object to store persistent state maintained by sudobot */
 /* Idea for storing state - callback on process.exit (?) */
@@ -11,7 +13,45 @@ var sudo_state = {
     open_times: []
 };
 
+var fs = require('fs');
+
+/* Do state read/writes synchronously. This is not necessary for when we load
+ * the state, but it *is* for when we write it on exit */
+
+var load_sudobot_state = function() {
+    if(fs.existsSync(SUDOBOT_STATE_FILE)) {
+        console.log("Found state file, loading state from file.");
+        data = fs.readFileSync(SUDOBOT_STATE_FILE);
+        sudo_state = JSON.parse(data);
+    } else {
+        console.log("No state file found, starting with default state.");
+    }
+};
+
+load_sudobot_state();
+
+var save_sudobot_state = function() {
+    fs.writeFileSync(
+        SUDOBOT_STATE_FILE,
+        JSON.stringify(sudo_state) // TODO: error handling?
+    );
+};
+
+var teardown_sudobot = function(save_state) {
+    if(save_state) {
+        console.log('Saving state to file...');
+        save_sudobot_state();
+    }
+    console.log('Goodbye!');
+    process.exit(0);
+};
+
+process.on('SIGINT', function() {
+    teardown_sudobot(true);
+});
+
 var irc = require('irc');
+
 var client = new irc.Client('chat.freenode.net', BOT_NAME, {
     channels: [BOT_CHANNEL],
 });
@@ -112,7 +152,7 @@ client.addListener('message', function(from, to, message) {
         if( sudo_state.open_flag == false ) {
             sudo_state.open_flag = true;
             sudo_state.opener = from;
-            opened = new Date(); // defaults to now
+            sudo_state.opened = new Date();
             client.say(BOT_CHANNEL, "sudoroom is open!");
         } else {
             client.say(BOT_CHANNEL, "sudoroom is already open. If this is a mistake, please close and re-open so I can keep track of our open times.");

@@ -71,21 +71,21 @@ client.addListener('names', function(channel, nicks) {
     transient_state.channels[channel].nicks = nicks;
 });
 
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
 
 	if(message.indexOf('yarr') > -1) {
 		client.say(to, 'Arrr Matey!');
 	}
 });
 
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
     
     if(message.indexOf('<3') > -1) {
         client.say(to, '<3');
     }
 });
 
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
     if(message == 'randomize') {
         client.say(to, Math.round(Math.random() * 10));
     }
@@ -100,7 +100,7 @@ client.addListener('error', function(message) {
 var irc_nick_re = /([A-Za-z0-9\[\]\{\}\-\\\^\<]+)/;
 
 /* Request a user's karma score */
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
     var karma_query_re = new RegExp("karma " + irc_nick_re.source);
     query_match = karma_query_re.exec(message);
 
@@ -115,7 +115,7 @@ client.addListener('message', function(from, to, message) {
 });
 
 /* Increment a user's karma score */
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
     var karma_inc_re = new RegExp(irc_nick_re.source + "\\+\\+");
     inc_match = karma_inc_re.exec(message);
 
@@ -132,7 +132,7 @@ client.addListener('message', function(from, to, message) {
 });
 
 /* Decrement a user's karma score */
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
     var karma_inc_re = new RegExp(irc_nick_re.source + "\\-\\-");
     dec_match = karma_inc_re.exec(message);
 
@@ -157,7 +157,7 @@ var string_in_list = function(string, list) {
     return false;
 };
 
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
     open_cmds = [
         "sudo open",
         "open!"
@@ -175,7 +175,7 @@ client.addListener('message', function(from, to, message) {
     }
 });
 
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
     close_cmds = [
         "sudo close",
         "closed!"
@@ -202,7 +202,7 @@ client.addListener('message', function(from, to, message) {
     }
 });
 
-client.addListener('message', function(from, to, message) {
+client.addListener('message#', function(from, to, message) {
     if(message == "open?") {
         if( sudo_state.open_flag == true ) {
             client.say(to, "sudoroom is open! (thanks, " + sudo_state.opener + ")" );

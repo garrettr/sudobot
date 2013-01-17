@@ -1,8 +1,3 @@
-BOT_CHANNEL = '#sudobot'
-BOT_NAME    = 'Sudobot'
-
-SUDOBOT_STATE_FILE = "sudobot-state.json"
-
 /* Object to store persistent state maintained by sudobot */
 /* Idea for storing state - callback on process.exit (?) */
 var sudo_state = {
@@ -12,6 +7,8 @@ var sudo_state = {
     opened: undefined,
     open_times: []
 };
+
+SUDOBOT_STATE_FILE = "sudobot-state.json"
 
 var fs = require('fs');
 
@@ -52,8 +49,26 @@ process.on('SIGINT', function() {
 
 var irc = require('irc');
 
-var client = new irc.Client('chat.freenode.net', BOT_NAME, {
-    channels: [BOT_CHANNEL],
+var client = new irc.Client('chat.freenode.net', 'sudobot', {
+    channels: ['#sudobot']
+    //debug:true
+});
+
+/* keep track of transient state - for now, just lists of nicks so we can do
+ * sanity checks */
+var transient_state = {
+    channels: {}
+};
+
+client.addListener('names', function(channel, nicks) {
+    // Initialize a transient state object for this channel if needed
+    if( !(channel in transient_state.channels) ) {
+        transient_state.channels[channel] = {};
+    }
+    // The nicks object passed to the callback is keyed by nick names, and has
+    // values ‘’, ‘+’, or ‘@’ depending on the level of that nick in the
+    // channel.
+    transient_state.channels[channel].nicks = nicks;
 });
 
 client.addListener('message', function(from, to, message) {
@@ -92,9 +107,9 @@ client.addListener('message', function(from, to, message) {
     if( query_match ) {
         username = query_match[1];
         if(username in sudo_state.karma_scores) {
-            client.say(BOT_CHANNEL, username + " has " + sudo_state.karma_scores[username] + " karma.");
+            client.say(to, username + " has " + sudo_state.karma_scores[username] + " karma.");
         } else {
-            client.say(BOT_CHANNEL, username + " has no karma score.");
+            client.say(to, username + " has no karma score.");
         }
     }
 });
@@ -153,9 +168,9 @@ client.addListener('message', function(from, to, message) {
             sudo_state.open_flag = true;
             sudo_state.opener = from;
             sudo_state.opened = new Date();
-            client.say(BOT_CHANNEL, "sudoroom is open!");
+            client.say(to, "sudoroom is open!");
         } else {
-            client.say(BOT_CHANNEL, "sudoroom is already open. If this is a mistake, please close and re-open so I can keep track of our open times.");
+            client.say(to, "sudoroom is already open. If this is a mistake, please close and re-open so I can keep track of our open times.");
         }
     }
 });
@@ -180,9 +195,9 @@ client.addListener('message', function(from, to, message) {
             sudo_state.opened = undefined;
             sudo_state.opener = undefined;
 
-            client.say(BOT_CHANNEL, "sudoroom is closed.");
+            client.say(to, "sudoroom is closed.");
         } else {
-            client.say(BOT_CHANNEL, "sudoroom was already closed.");
+            client.say(to, "sudoroom was already closed.");
         }
     }
 });
@@ -190,9 +205,9 @@ client.addListener('message', function(from, to, message) {
 client.addListener('message', function(from, to, message) {
     if(message == "open?") {
         if( sudo_state.open_flag == true ) {
-            client.say(BOT_CHANNEL, "sudoroom is open! (thanks, " + sudo_state.opener + ")" );
+            client.say(to, "sudoroom is open! (thanks, " + sudo_state.opener + ")" );
         } else {
-            client.say(BOT_CHANNEL, "sudoroom is closed right now." );
+            client.say(to, "sudoroom is closed right now." );
         }
     }
 });

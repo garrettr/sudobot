@@ -8,7 +8,7 @@ var Room = function(client) {
 
   /* Open the room */
   client.addListener('message#', function(nick, to, text) {
-    open_re = new RegExp('^open!$');
+    open_re = new RegExp('open!');
     var match = open_re.exec(text);
     if(match) {
       if(is_open) {
@@ -30,7 +30,7 @@ var Room = function(client) {
 
   /* Close the room */
   client.addListener('message#', function(nick, to, text) {
-    close_re = new RegExp('^close!$');
+    close_re = new RegExp('close!');
     var match = close_re.exec(text);
     if(match) {
       if(is_open) {
@@ -50,7 +50,7 @@ var Room = function(client) {
 
   /* Query the room's state */
   client.addListener('message#', function(nick, to, text) {
-    open_query_re = new RegExp('^open\\?$');
+    open_query_re = new RegExp('open\\?');
     var match = open_query_re.exec(text);
     if(match) {
       if(is_open) {

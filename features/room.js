@@ -61,6 +61,16 @@ var Room = function(client) {
       client.say(to, response);
     }
   });
+
+  return {
+    name: "sudoroom",
+    description: "Is the room open? Ask here first.",
+    commands: {
+      'open?': 'Ask if the Sudoroom physical space is open',
+      'open!': "Tell sudobot you're opening the room",
+      'close!': "Tell sudobot you're closing the room"
+    }
+  };
 };
 
 module.exports = Room;

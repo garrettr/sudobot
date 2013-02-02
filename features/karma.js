@@ -40,6 +40,16 @@ var Karma = function(client) {
       (nick in karma_scores) ? karma_scores[nick]-- : karma_scores[nick] = -1;
     }
   });
+
+  return {
+    name: "karma",
+    description: "Internet points",
+    commands: {
+      'karma <username>': "Get a user's karma score",
+      '<username>++': "Increment a user's karma score",
+      '<username>--': "Decrement a user's karma score"
+    }
+  }
 };
 
 module.exports = Karma;

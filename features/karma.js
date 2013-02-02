@@ -2,11 +2,6 @@
 var irc_nick_re = "([A-Za-z0-9]+)";
 
 var Karma = function(client) {
-  // DEBUG
-  client.addListener('message', function (from, to, message) {
-    console.log(from + ' => ' + to + ': ' + message);
-  });
-
   var karma_scores = {};
 
   client.addListener('message#', function(nick, to, text) {

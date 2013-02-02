@@ -37,6 +37,12 @@ function Sudobot(server, nick, options) {
       client.say(channel, "Hi! I'm sudobot, your friendly Sudo Room IRC chatbot. You can learn more about me by typing '/msg sudobot help'.");
     }
   });
+
+
+  /* Log any errors from IRC - try to keep running */
+  client.addListener('error', function(message) {
+    console.log('error: ', message);
+  });
 }
 
 Sudobot.prototype.addFeature = function(feature) {

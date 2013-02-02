@@ -7,7 +7,7 @@ var Room = function(client) {
   var open_history = [];
 
   /* Open the room */
-  client.addListener('message#', function(nick, to, text) {
+  client.addListener('message', function(nick, to, text) {
     open_re = new RegExp('open!');
     var match = open_re.exec(text);
     if(match) {
@@ -24,12 +24,12 @@ var Room = function(client) {
           closed_by: undefined
         });
       }
-      client.say(to, response);
+      client.say(nick, response);
     }
   });
 
   /* Close the room */
-  client.addListener('message#', function(nick, to, text) {
+  client.addListener('message', function(nick, to, text) {
     close_re = new RegExp('close!');
     var match = close_re.exec(text);
     if(match) {
@@ -44,12 +44,12 @@ var Room = function(client) {
       } else {
         response = "sudoroom is already closed."
       }
-      client.say(to, response);
+      client.say(nick, response);
     }
   });
 
   /* Query the room's state */
-  client.addListener('message#', function(nick, to, text) {
+  client.addListener('message', function(nick, to, text) {
     open_query_re = new RegExp('open\\?');
     var match = open_query_re.exec(text);
     if(match) {
@@ -58,7 +58,7 @@ var Room = function(client) {
       } else {
         response = "sudoroom is closed.";
       }
-      client.say(to, response);
+      client.say(nick, response);
     }
   });
 
